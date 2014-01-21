@@ -20,4 +20,4 @@ makeArr=curry(fillArr)(0),
 uncurry1=compose(cflip,cflip),
 reduce_=curry(flip(pushCtx([].reduce))),
 uncurryAll=compose(reduce_,uncurry1),
-fpow=[].reduce,compose,fillArr
+fpow=compose(reduce_(compose),fillArr)

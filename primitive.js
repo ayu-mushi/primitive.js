@@ -23,7 +23,7 @@ function args(f,n){return function(){return f.apply(null,[].slice.call(arguments
 function curry(f){return args(function(a){return args(function(b){return f.apply(null,a.concat(b))},0)},0)}
 const flip=curry(args(function(f,a,b,rest){return f.apply(null,[b].concat([a],rest))},3)),
 uncurry1=curry(function(f,a,b){return f(a)(b)}),
-compose=curry(args(function(f,g,a){return f.apply(null,g.apply(null,a.slice(a.length,)),a.slice(a.length,))},2)),
+compose=curry(args(function(n,f,g,a){return f.apply(null,g.apply(null,a.slice(0,n)),a.slice(n))},2)),
 call_=curry(args(apply_,2)),
 constant=curry(id),
 partial=uncurry1(curry),

@@ -4,16 +4,16 @@ function neq(a,b){return a!==b}
 function not(p){return !p}
 function and(p,q){return p&&q}
 function or(p,q){return p||q}
-function neg(x){return -x}
-function add(x,y){return x+y}
-function sub(x,y){return x-y}
-function mul(x,y){return x*y}
-function div(x,y){return x/y}
-function mod(x,y){return x%y}
-function lt(x,y){return x<y}
-function gt(x,y){return x>y}
-function le(x,y){return x<=y}
-function ge(x,y){return x>=y}
+function neg(n){return -n}
+function add(n,m){return n+m}
+function sub(n,m){return n-m}
+function mul(n,m){return n*m}
+function div(n,m){return n/m}
+function mod(n,m){return n%m}
+function lt(n,m){return n<m}
+function gt(n,m){return n>m}
+function le(n,m){return n<=m}
+function ge(n,m){return n>=m}
 function get(a,i){return a[i]}
 function set(a,i,e){a[i]=e;return a}
 function fillArr(e,len){var a=[];for(var i=len-1;i+1;i--)a[i]=e;return a}
@@ -34,6 +34,7 @@ function curry(f){
 const flip=curry(args(function(f,a,b,rest){return f.apply(null,[b].concat([a],rest))},3)),
 uncurry1=curry(function(f,a,b){return f(a)(b)}),
 compose=curry(args(function(f,g,a){return f(g.apply(null,a))},2)),
+fpow=curry(args(function(f,n,a){for(;n+1;n--)a=f(a,n);return a},2)),
 call_=curry(args(apply_,2)),
 constant=curry(id),
 partial=uncurry1(curry),
@@ -47,7 +48,7 @@ itrate,
 hook,
 fork,
 train,
-uncurryAll=args(bind2nd(call_([].reduce),uncurry1),0),
+uncurry=args(bind2nd(call_([].reduce),uncurry1),0),
 //fpow=compose(bind2nd(call_([].reduce),pass(compose,2)),fillArr),
 inc=partial(add,1),
 dec=partial(add,-1),
@@ -61,5 +62,5 @@ init=bind2nd(call_([].slice),-1),
 zip,
 zipWith,
 repeatdCombi,
-//clone=bind2nd(mapObj,id),
+clone,
 defaultArg

@@ -3,17 +3,16 @@ function get(i,a){return a[i]}
 function set(i,e,a){a[i]=e;return a}
 function apply_(f,ctx,a){return f.apply(ctx,a)}
 function addReturn(f,a){f(a);return a}
-function args0(f){return function(){return f(arguments)}}
 function args(n,f){
 	return function(){
 		return f.apply(null,
 			[].slice.call(arguments,0,n).concat([[].slice.call(arguments,n)]))}}
 function curry(f){
-	return args(0,
-		function(a){
-			return f.bind.apply(f,[null].concat(a))})}
+	return function(){
+		return f.bind.apply(f,[null].concat([].slice.call(arguments)))}}
 function justapp(f,a){return f(a)}
 function for_(f,p,n,a){while(p(n,a))a=f(a,n--);return a}
+function while_(f,p,a){while(p(a))a=f(a);return a}
 var flip=curry(
 	args(3,
 		function(f,a,b,rest){
@@ -54,11 +53,8 @@ bit_shl=op2("<<"),bit_sar=op2(">>"),bit_shr=op2(">>>"),
 id=op1(""),
 constant=wrap(id),
 arrapp=bind2nd(apply_,null),
-arrapp_c=curry(arrapp),
-uncurryM=curry(
-	args(0,
-		part(foldl,arrapp))),
-B1st=uncurry(B(curry(B),curry)),
+B1st_c=B(curry(B),curry),
+B1st=uncurry(B1st_c),
 B2nd=uncurry(B1st(B1st,flip)),
 mulapp=bind2nd(for_,id),
 fpow=curry(mulapp),
@@ -66,9 +62,8 @@ unshift_=B1st(addReturn,curry2nd(fromMember([].unshift))),
 push_=B1st(addReturn,curry2nd(fromMember([].push))),
 shift_=part(addReturn,fromMember([].shift)),
 pop_=part(addReturn,fromMember([].pop)),
-fillArray_c=B1st(mulapp,push_),
-fillArray=uncurry(fillArray_c),
-itrate=mulapp,
+fillArray=B1st(mulapp,push_),
+itrate/*=mulapp push*/,
 delaydB=uncurry(B2nd(B,uncurry)),
 pam__=
 	B2nd(fromMember([].map),
@@ -79,29 +74,46 @@ pam= /* (&&&) */
 		curry(args(1,pam_))),
 //function(f){return args(0,function(g,a){return f(g.apply(a))})}
 hook_=part(pam,id),
-fork=bind2nd(B,pam_),
-hook=bind2nd(B,hook_),
+fork=
+	B(part(args,0),
+		B1st(bind2nd(B,
+				args(1,pam_)),
+			curry(arrapp))),
+hook=B(bind2nd(part,id),fork),
+fappose/* (***) zipWith(justapp)*/,
+jcompose=
+	B1st(bind2nd(B,
+			args(1,flip(fromMember([].map)))),
+		curry(arrapp)),
 head=part(get,0),
-behead=bind2nd(fromMember([].slice),1),
+tail=bind2nd(fromMember([].slice),1),
 take=bind2nd(fromMember([].slice),0),
+drop,
 init=B(take,[].reverse),
-argop=B(cflip,part(B2nd,arrapp)),
+argop=B1st(B(part(args,0),justapp),
+		B(cflip,
+			part(B2nd,arrapp))),
 bond=argop(curry2nd(fromMember([].map))),
 reverseArg=argop(fromMember([].reverse)),
-fillArg=B2nd(arrapp,fillArray),
+fillArg=arrapp(fillArray),
 W=part(fillArg,2),
-U=part(W,justapp),
 pass=argop(take),
 defaults,
 inc=part(add,1),
 dec=part(add,-1),
 len=part(get,"length"),
 lastIx=B(dec,len),
-last= /* hook(flip(get),lastIx) */
-	B(part(arrapp,get),
-		pam(lastIx,id)),
-back,
-ring,
+last=hook(flip(get))(lastIx),
+double=part(mul,2),
+half=part(mul,0.5),
+center=
+	hook(flip(get))
+		(B(Math.floor,B(half,len))),
+/*back=
+	hook(flip(get))
+		(B2nd(sub,len)),*/
+ring_get,
+ring_set,
 //mapObj=B(curry2nd(fromMember([].map)),Object.keys),//function(f,a){return Object.keys(a).map(function(i){return f(a[i],i,a)})}
 merge,
 extend,
@@ -111,22 +123,20 @@ splat,
 repeatdCombi,
 cloneArray=[].concat.bind([]),
 clone,
-//values=B(,pam(Object.keys,id)),
+values,
 isDefined=part(neq,void 0),
-memoize=function(f,memo){
+memoize=function(memo,f){
 	return function(){
 		var key=arguments;
 		return memo[key]===void 0?memo[key]=arrapp(f,key):memo[key]}},
-memoizedFor=B(for_,bind2nd(B,memoize)),
-memoizedFpow=bind2nd(memoizedFor,id),
 /*shape=B2nd(for_,
 	B(push_,
 		B(head,len))),
 	flip(isDefined))*/
-
+dimention,
 /* bool */
 nor=B(not,or),
 nand=B(not,and),
-xor,
+xor=fork(and)(or,nand),
 imp_c=B1st(or,not),
 imp=uncurry(imp_c)

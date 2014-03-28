@@ -78,8 +78,8 @@ fork=
 				args(1,pam_)),
 			curry(arrapp))),
 hook=B(bind2nd(part,id),fork),
-//zip=function(x,y){return x.map(function(e,i){return [e,y[i]]})},
-zip=hook(fromMember([].map))(function(e,i){return [e,y[i]]}),
+zip=function(x,y){return x.map(function(e,i){return [e,y[i]]})},
+//zip=bind2nd(fromMember([].map)),
 zipWith=
 	B(bind2nd(fromMember([].map),
 		part(arrapp,justapp)),
@@ -92,35 +92,41 @@ jcompose=
 head=part(get,0),
 tail=bind2nd(fromMember([].slice),1),
 take=bind2nd(fromMember([].slice),0),
-drop,
-init=B(take,[].reverse),
+drop=B2nd(take,neg),
+init=bind2nd(drop,-1),
 arg_op=B1st(B(part(args,0),justapp),
 		B(cflip,
 			part(B2nd,arrapp))),
 bond=arg_op(curry2nd(fromMember([].map))),
 reverseArg=arg_op(fromMember([].reverse)),
 fillArg=arrapp(fillArray),
-W=part(fillArg,2),
-pass=arg_op(take),
-defaults,
+dup=part(fillArg,2),
+discard=arg_op(take),
 inc=part(add,1),
 dec=part(add,-1),
 len=part(get,"length"),
 lastIx=B(dec,len),
 last=hook(flip(get))(lastIx),
+swap,
 double=part(mul,2),
 half=part(mul,0.5),
 center=
 	hook(flip(get))
 		(B(Math.floor,B(half,len))),
+back=B(part(arrapp,get),fappose([mod,id])),
 /*back=
 	hook(flip(get))
 		(B2nd(sub,len)),*/
-ring_get,
-ring_set,
+ring_get=B(part(arrapp,get),fappose([mod,id])),
+ring_set=B(part(arrapp,set),fappose([mod,id,id])),
+
+/* objective */
 mapObj,
 merge,
 extend,
+passThis=B1st(dup,curry(call_)),
+addProto=part(set,"prototype"),
+
 splat,
 repeatdCombi,
 cloneArray=[].concat.bind([]),
@@ -136,6 +142,7 @@ memoize=function(memo,f){
 		B(head,len))),
 	flip(isDefined))*/
 dimention,
+
 /* bool */
 nor=B(not,or),
 nand=B(not,and),

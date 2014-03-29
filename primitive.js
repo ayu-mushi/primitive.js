@@ -32,7 +32,7 @@ uncurry=curry(
 part=uncurry(curry),
 wrap=curry,
 curry2nd=B(curry,flip),
-bind2nd=uncurry(curry2nd),
+bind2nd=flip,
 cflip=B(curry,B(flip,uncurry)),
 define,
 
@@ -142,6 +142,8 @@ memoize=function(memo,f){
 		B(head,len))),
 	flip(isDefined))*/
 dimention,
+toDeep,
+flat=part(foldl,fromMember([].concat)),
 
 /* bool */
 nor=B(not,or),

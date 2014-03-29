@@ -97,15 +97,6 @@ reverseArg=arg_op(fromMember([].reverse)),
 discard_c=B(arg_op,curry2nd(take)),
 discardTail=bind2nd(B,id),
 len=part(get,"length"),
-mknil=B(part(arrapp,Array),constant([])),
-fillArray=
-	fork(whileNoRet)
-		(flip(discardTail(curry2nd(fromMember([].push)))),
-			B(bind2nd(B,len),discardTail(curry(neq))),
-			mknil),
-fillArg=B2nd(arrapp,fillArray),
-dup=pam(id,id),
-dupArg=B2nd(arrapp,dup),
 zip=function(x,y){
 	return x.map(function(e,i){return [e,y[i]]})},
 //zip=bind2nd(fromMember([].map)),
@@ -120,6 +111,16 @@ converge=
 		B1st(bind2nd(B,
 			args(1,zipapp)),
 		curry(arrapp))),
+mknil=B(part(arrapp,Array),constant([])),
+fillArray=
+	converge(whileNoRet)
+		(curry2nd(fromMember([].push)),
+			B(bind2nd(B,len),curry(neq)),
+			mknil),
+fillArg=B2nd(arrapp,fillArray),
+dup=pam(id,id),
+dupArg=cflip(B2nd(arrapp,dup)),
+
 isDefined=part(neq,void 0),
 defaultIdApp=
 	hook(curry2nd(iif))(isDefined),
@@ -156,7 +157,7 @@ splat,
 repeatdCombi,
 cloneArray=[].concat.bind([]),
 clone,
-values,
+//values=hook()(Object.keys),
 memoize=function(memo,f){
 	return function(){
 		var key=arguments;
@@ -174,6 +175,8 @@ nor=B(not,or),
 nand=B(not,and),
 xor=fork(and)(or,nand),
 imp_c=B1st(or,not),
-imp=uncurry(imp_c)
-//thenId=dup(curry(iif)),
-//elseId
+imp=uncurry(imp_c),
+thenId=bind2nd(iif,id),
+elseId_c=B1st(thenId,not),
+thenIt=B(dupArg(B),part(B1st,iif)),//(p,a,b) -> p(a)?a:b
+elseIt=B(thenIt,not)//(p,a,b) -> !p(a)?a:b

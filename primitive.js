@@ -13,10 +13,12 @@ function curry(f){
 function justapp(f,a){return f(a)}
 function for_(f,p,n,a){while(p(n,a))a=f(a,n--);return a}
 function while_(f,p,a){while(p(a))a=f(a);return a}
+function whileNoRet(f,p,a){while(p(a))f(a);return a}
 var flip=curry(
 	args(3,
 		function(f,a,b,rest){
 			return f.apply(null,[b].concat([a],rest))})),
+bind2nd=flip,
 B=curry(
 	args(2,
 		function(f,g,a){
@@ -29,11 +31,10 @@ foldr=flipCtx([].reduceRight),
 uncurry=curry(
 	args(0,
 		curry(foldl)(justapp))),
-part=uncurry(curry),
+part=bind2nd(fromMember(alert.bind),null),
 wrap=curry,
-curry2nd=B(curry,flip),
-bind2nd=flip,
-cflip=B(curry,B(flip,uncurry)),
+curry2nd=curry(bind2nd),
+cflip=B(curry2nd,uncurry),
 define,
 
 op1=
@@ -54,16 +55,18 @@ constant=wrap(id),
 arrapp=bind2nd(apply_,null),
 B1st_c=B(curry(B),curry),
 B1st=uncurry(B1st_c),
-B2nd=uncurry(B1st(B1st,flip)),
+B2nd=uncurry(B(B1st_c,flip)),
 mulapp=bind2nd(for_,id),
 fpow=curry(mulapp),
 unshift_=B1st(addReturn,curry2nd(fromMember([].unshift))),
 push_c=B1st(addReturn,curry2nd(fromMember([].push))),
 shift_=part(addReturn,fromMember([].shift)),
 pop_=part(addReturn,fromMember([].pop)),
-fillArray=B1st(mulapp,push_c),
-itrate/*=mulapp push*/,
-delaydB=uncurry(B2nd(B,uncurry)),
+
+itrate/*mulapp push*/,
+cB_c=B1st(B,curry(B)),
+cB1st_c=B(cB_c,curry),
+cB2nd_c=B(cB_c,flip),
 pam__=
 	B2nd(fromMember([].map),
 		curry2nd(arrapp)),
@@ -77,18 +80,11 @@ fork=
 		B1st(bind2nd(B,
 				args(1,pam_)),
 			curry(arrapp))),
+cfork_c=B1st(B,fork),
 hook=B(bind2nd(part,id),fork),
-zip=function(x,y){return x.map(function(e,i){return [e,y[i]]})},
-//zip=bind2nd(fromMember([].map)),
-zipWith=
-	B(bind2nd(fromMember([].map),
-		part(arrapp,justapp)),
-	zip),
-fappose=zipWith(justapp),
-jcompose=
-	B1st(bind2nd(B,
-			args(1,flip(fromMember([].map)))),
-		curry(arrapp)),
+chook=B1st(B,hook),
+
+addFillArray=B1st(mulapp,push_c),
 head=part(get,0),
 tail=bind2nd(fromMember([].slice),1),
 take=bind2nd(fromMember([].slice),0),
@@ -97,34 +93,63 @@ init=bind2nd(drop,-1),
 arg_op=B1st(B(part(args,0),justapp),
 		B(cflip,
 			part(B2nd,arrapp))),
-bond=arg_op(curry2nd(fromMember([].map))),
 reverseArg=arg_op(fromMember([].reverse)),
-fillArg=arrapp(fillArray),
-dup=part(fillArg,2),
-discard=arg_op(take),
+discard_c=B(arg_op,curry2nd(take)),
+discardTail=bind2nd(B,id),
+len=part(get,"length"),
+mknil=B(part(arrapp,Array),constant([])),
+fillArray=
+	fork(whileNoRet)
+		(flip(discardTail(curry2nd(fromMember([].push)))),
+			B(bind2nd(B,len),discardTail(curry(neq))),
+			mknil),
+fillArg=B2nd(arrapp,fillArray),
+dup=pam(id,id),
+dupArg=B2nd(arrapp,dup),
+zip=function(x,y){
+	return x.map(function(e,i){return [e,y[i]]})},
+//zip=bind2nd(fromMember([].map)),
+//zipWith,
+zipapp=B(bind2nd(fromMember([].map),
+		part(arrapp,justapp)),
+	zip),
+fappose=/* (***) */
+	curry(zipapp),
+converge=
+	B(part(args,0),
+		B1st(bind2nd(B,
+			args(1,zipapp)),
+		curry(arrapp))),
+isDefined=part(neq,void 0),
+defaultIdApp=
+	hook(curry2nd(iif))(isDefined),
+jcompose=
+	B1st(bind2nd(B,
+			args(1,flip(fromMember([].map)))),
+		curry(arrapp)),
 inc=part(add,1),
 dec=part(add,-1),
-len=part(get,"length"),
 lastIx=B(dec,len),
 last=hook(flip(get))(lastIx),
 swap,
+swapArg,
 double=part(mul,2),
 half=part(mul,0.5),
 center=
 	hook(flip(get))
 		(B(Math.floor,B(half,len))),
-back=B(part(arrapp,get),fappose([mod,id])),
-/*back=
-	hook(flip(get))
-		(B2nd(sub,len)),*/
-ring_get=B(part(arrapp,get),fappose([mod,id])),
+back=B(part(arrapp,get),fappose([sub,id])),
+back=
+	chook(flip(get))
+		(B1st(sub,lastIx)),
+ring_get=B(part(B,get),curry(mod)),
 ring_set=B(part(arrapp,set),fappose([mod,id,id])),
 
 /* objective */
 mapObj,
 merge,
 extend,
-passThis=B1st(dup,curry(call_)),
+//passThis=B1st(dup,curry(call_)),
 addProto=part(set,"prototype"),
 
 splat,
@@ -132,7 +157,6 @@ repeatdCombi,
 cloneArray=[].concat.bind([]),
 clone,
 values,
-isDefined=part(neq,void 0),
 memoize=function(memo,f){
 	return function(){
 		var key=arguments;
@@ -143,7 +167,7 @@ memoize=function(memo,f){
 	flip(isDefined))*/
 dimention,
 toDeep,
-flat=part(foldl,fromMember([].concat)),
+flat=part(foldl,discard_c(2)(fromMember([].concat))),
 
 /* bool */
 nor=B(not,or),
@@ -151,3 +175,5 @@ nand=B(not,and),
 xor=fork(and)(or,nand),
 imp_c=B1st(or,not),
 imp=uncurry(imp_c)
+//thenId=dup(curry(iif)),
+//elseId

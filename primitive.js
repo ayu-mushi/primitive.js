@@ -86,6 +86,7 @@ chook=B1st(B,hook),
 
 addFillArray=B1st(mulapp,push_c),
 head=part(get,0),
+neck=part(get,1),
 tail=bind2nd(fromMember([].slice),1),
 take=bind2nd(fromMember([].slice),0),
 drop=B2nd(take,neg),
@@ -97,8 +98,11 @@ reverseArg=arg_op(fromMember([].reverse)),
 discard_c=B(arg_op,curry2nd(take)),
 discardTail=bind2nd(B,id),
 len=part(get,"length"),
+turn,
 zip=function(x,y){
 	return x.map(function(e,i){return [e,y[i]]})},
+get2d=B2nd(get,get),
+unzip,
 //zip=bind2nd(fromMember([].map)),
 //zipWith,
 zipapp=B(bind2nd(fromMember([].map),
@@ -115,8 +119,8 @@ mknil=B(part(arrapp,Array),constant([])),
 fillArray=
 	converge(whileNoRet)
 		(curry2nd(fromMember([].push)),
-			B(bind2nd(B,len),curry(neq)),
-			mknil),
+		cflip(B1st(neq,len)),
+		mknil),
 fillArg=B2nd(arrapp,fillArray),
 dup=pam(id,id),
 dupArg=cflip(B2nd(arrapp,dup)),
@@ -162,10 +166,8 @@ memoize=function(memo,f){
 	return function(){
 		var key=arguments;
 		return memo[key]===void 0?memo[key]=arrapp(f,key):memo[key]}},
-/*shape=B2nd(for_,
-	B(push_c,
-		B(head,len))),
-	flip(isDefined))*/
+childLen=B(len,head),
+//shape=bind2nd(whileNoRet,isDefined) childLen,
 dimention,
 toDeep,
 flat=part(foldl,discard_c(2)(fromMember([].concat))),

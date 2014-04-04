@@ -25,12 +25,12 @@ B=curry(
 			return f(g.apply(null,a))})),
 _call=args(2,_aryapp),
 fromMember=curry(_call),
-uncurry=curry(
-	args(0,
-		curry(flip(fromMember([].reduce)))(justapp))),
 part=bind2nd(fromMember(alert.bind),null),
 wrap=curry,
 curry2nd=curry(bind2nd),
+uncurry=curry(
+	args(0,
+		curry2nd(fromMember([].reduce))(justapp))),
 flipc=B(curry2nd,uncurry),
 define,
 
@@ -55,6 +55,8 @@ B1st=uncurry(c_B1st),
 c_B2nd=B(c_B1st,flip),
 B2nd=uncurry(c_B2nd),
 mulapp=bind2nd(_for,id),
+/*mulapp=
+	bind2nd(_while,head),*/
 fpow=curry(mulapp),
 _unshift=B1st(addReturn,curry2nd(fromMember([].unshift))),
 c_push=B1st(addReturn,curry2nd(fromMember([].push))),
@@ -80,7 +82,7 @@ fork=
 c_forkc=c_B1st(B)(fork),
 hook=B(bind2nd(part,id),fork),
 hookc=c_B1st(B)(hook),
-addFillAry=c_B1st(mulapp)(c_push),
+//addFillAry=c_B1st(mulapp)(c_push),
 head=part(get,0),
 tail=bind2nd(fromMember([].slice),1),
 take=bind2nd(fromMember([].slice),0),
@@ -123,10 +125,14 @@ fillArgs=B2nd(aryapp,fillAry),
 dup=pam(id,id),
 dupArgs=flipc(B2nd(aryapp,dup)),
 isDefined=part(neq,void 0),
-c_defauApp=
+c_defaudApp=
 	c_B1st(justapp)
-		(hook(flip(iif))(isDefined,constant(id))),
-defauZipapp,
+		(hook(flip(iif))
+			(isDefined,constant(id))),
+defaudZipapp=
+	B(bind2nd(fromMember([].map),
+		part(aryapp,uncurry(c_defaudApp))),
+	zip),
 c_jcompose=
 	c_B1st(bind2nd(B,
 			args(1,flip(fromMember([].map)))))
@@ -141,30 +147,40 @@ double=part(mul,2),
 half=part(mul,0.5),
 centerIx=B(Math.floor,B(half,len)),
 center=hook(flip(get))(centerIx),
-/*back=
-	hookc(flip(get))
-		(B1st(sub,lastIx)),*/
+back=fork(function(f,a){return function(n){return a[f(n)]}})
+		(B1st(sub,lastIx),id),
 ringGet,
 ringSet,
-
-mapObj,
+c_foldl=c_B1stc(fromMember([].reduce))
+	(_unshift),
+mapObj=function(f,a){
+	return c_foldl({})
+		(Object.keys(a))
+		(function(b,k,i){
+			return set(k,f(a[k]),b)})},
 merge,
-
 splat,
-repeatdCombi,
 cloneAry=[].concat.bind([]),
 clone,
-//values=hook()(Object.keys),
+values=fork(fromMember([].map))
+	(Object.keys,curry2nd(get)),
 memoize=function(memo,f){
 	return function(){
 		var key=arguments;
 		return memo[key]===void 0?memo[key]=aryapp(f,key):memo[key]}},
 childLen=B(len,head),
-//shape=bind2nd(whileNoRet,isDefined) head push len,
+shape/*=
+	converge(bind2nd(whileNoRet,isDefined))
+		(head push len,mknil)*/,
 dimention,
 toDeep,
-flat=bind2nd(fromMember([].reduce),c_discard(2)(fromMember([].concat))),
-
+map2d=function(f,a){
+	return a.map(function(b,i){
+		return b.map(function(e,j){
+			return f(e,i,j,a)})})},
+flat=
+	bind2nd(fromMember([].reduce),
+		c_discard(2)(fromMember([].concat))),
 /* bool */
 nor=B(not,or),
 nand=B(not,and),
@@ -172,6 +188,5 @@ xor=fork(and)(or,nand),
 c_imp=c_B1st(or)(not),
 imp=uncurry(c_imp),
 thenId=bind2nd(iif,id),
-c_elseId=c_B1st(thenId)(not)
-/*thenIt=B(dupArgs,iif),//(p,a,b) -> p(a)?a:b
-elseIt=B(thenIt,not)//(p,a,b) -> !p(a)?a:b*/
+c_elseId=c_B1st(thenId)(not),
+thenIt=function(p,a,b){return p(a)?a:b}

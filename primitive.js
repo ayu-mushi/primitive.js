@@ -81,6 +81,7 @@ fork=
 			(curry(aryapp))),
 c_forkc=c_B1st(B)(fork),
 hook=B(bind2nd(part,id),fork),
+hook2nd=B(bind2nd(bind2nd,id),fork),
 hookc=c_B1st(B)(hook),
 //addFillAry=c_B1st(mulapp)(c_push),
 head=part(get,0),
@@ -140,13 +141,13 @@ c_jcompose=
 inc=part(add,1),
 dec=part(add,-1),
 lastIx=B(dec,len),
-last=hook(flip(get))(lastIx),
+last=hook2nd(get)(lastIx),
 swap,
 swapArg,
 double=part(mul,2),
 half=part(mul,0.5),
 centerIx=B(Math.floor,B(half,len)),
-center=hook(flip(get))(centerIx),
+center=hook2nd(get)(centerIx),
 back=fork(function(f,a){return function(n){return a[f(n)]}})
 		(B1st(sub,lastIx),id),
 ringGet,
@@ -167,12 +168,19 @@ values=fork(fromMember([].map))
 memoize=function(memo,f){
 	return function(){
 		var key=arguments;
-		return memo[key]===void 0?memo[key]=aryapp(f,key):memo[key]}},
+		return memo.hasOwnProperty(key)?
+			memo[key]=aryapp(f,key):memo[key]}},
 childLen=B(len,head),
 shape/*=
 	converge(bind2nd(whileNoRet,isDefined))
-		(head push len,mknil)*/,
-dimention,
+		(head push len,mknil),*/
+dimention=
+	B(part(get,1),
+		bind2nd(
+			args(0,part(_while,
+				fappose([head,inc]),
+				B(isDefined,head))),
+			-1)),
 toDeep,
 map2d=function(f,a){
 	return a.map(function(b,i){
@@ -181,7 +189,6 @@ map2d=function(f,a){
 flat=
 	bind2nd(fromMember([].reduce),
 		c_discard(2)(fromMember([].concat))),
-/* bool */
 nor=B(not,or),
 nand=B(not,and),
 xor=fork(and)(or,nand),

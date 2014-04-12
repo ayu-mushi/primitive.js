@@ -93,6 +93,7 @@ argsOp=c_B1st(B(part(args,0),justapp))
 		(B(flipc,
 			part(B2nd,aryapp))),
 reverseArgs=argsOp(fromMember([].reverse)),
+c_bindLast=B(curry,reverseArgs),
 c_discard=B(argsOp,curry2nd(take)),
 discardTail=bind2nd(B,id),
 len=part(get,"length"),
@@ -174,13 +175,18 @@ childLen=B(len,head),
 shape/*=
 	converge(bind2nd(whileNoRet,isDefined))
 		(head push len,mknil),*/
+B1stc=uncurry(c_B1stc),
+appElm=
+	fork(B1stc)
+		(curry(set),curry(get)),
+incElm=inc pam(curry(set),curry(get)),
+decElm,
 dimention=
 	B(part(get,1),
-		bind2nd(
-			args(0,part(_while,
+		B(part(_while,
 				fappose([head,inc]),
-				B(isDefined,head))),
-			-1)),
+				B(isDefined,head)),
+			bind2nd(Array,-1))),
 toDeep,
 map2d=function(f,a){
 	return a.map(function(b,i){

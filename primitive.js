@@ -172,15 +172,15 @@ memoize=function(memo,f){
 		return memo.hasOwnProperty(key)?
 			memo[key]=aryapp(f,key):memo[key]}},
 childLen=B(len,head),
-shape/*=
+shape,/*=
 	converge(bind2nd(whileNoRet,isDefined))
 		(head push len,mknil),*/
-B1stc=uncurry(c_B1stc),
-appElm=
-	fork(B1stc)
-		(curry(set),curry(get)),
-incElm=inc pam(curry(set),curry(get)),
-decElm,
+c_appElm=
+	curry(fork(curry(reverseArgs(flip(reverseArgs(B())))))
+		(curry2nd(reverseArgs(flip(set))),get)),
+appElm=reverseArgs(uncurry(c_appElm)),
+incElm=part(appElm,inc),
+decElm=part(appElm,dec),
 dimention=
 	B(part(get,1),
 		B(part(_while,

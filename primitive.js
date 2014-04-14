@@ -11,10 +11,10 @@ function curry(f){
 	return function(){
 		return f.bind.apply(f,[null].concat([].slice.call(arguments)))}}
 function justapp(f,a){return f(a)}
-function _for(f,p,n,a){while(p(n,a))a=f(a,n--);return a}
 function _while(f,p,a){while(p(a))a=f(a);return a}
 function whileNoRet(f,p,a){while(p(a))f(a);return a}
-var flip=curry(
+var
+flip=curry(
 	args(3,
 		function(f,a,b,rest){
 			return f.apply(null,[b].concat([a],rest))})),
@@ -54,10 +54,6 @@ c_B1st=B(curry(B),curry),
 B1st=uncurry(c_B1st),
 c_B2nd=B(c_B1st,flip),
 B2nd=uncurry(c_B2nd),
-mulapp=bind2nd(_for,id),
-/*mulapp=
-	bind2nd(_while,head),*/
-fpow=curry(mulapp),
 _unshift=B1st(addReturn,curry2nd(fromMember([].unshift))),
 c_push=B1st(addReturn,curry2nd(fromMember([].push))),
 _shift=part(addReturn,fromMember([].shift)),
@@ -93,7 +89,8 @@ argsOp=c_B1st(B(part(args,0),justapp))
 		(B(flipc,
 			part(B2nd,aryapp))),
 reverseArgs=argsOp(fromMember([].reverse)),
-c_bindLast=B(curry,reverseArgs),
+curryLast=B(curry,reverseArgs),
+bindLast=uncurry(curryLast),
 c_discard=B(argsOp,curry2nd(take)),
 discardTail=bind2nd(B,id),
 len=part(get,"length"),
@@ -104,7 +101,6 @@ c_zip=
 	c_B2nd(fromMember([].map))
 		(B(_hook,
 			B(flip,curry2nd(get)))),
-get2d=B2nd(get,get),
 unzip,
 zipWith,
 zipapp=B(bind2nd(fromMember([].map),
@@ -112,6 +108,8 @@ zipapp=B(bind2nd(fromMember([].map),
 	zip),
 fappose=/* (***) */
 	curry(zipapp),
+arity_fappose=
+	args(0,fappose),
 converge=
 	B(part(args,0),
 		c_B1st(bind2nd(B,
@@ -155,11 +153,13 @@ ringGet,
 ringSet,
 c_foldl=c_B1stc(fromMember([].reduce))
 	(_unshift),
+foldl=uncurry(c_foldl),
 mapObj=function(f,a){
 	return c_foldl({})
 		(Object.keys(a))
 		(function(b,k,i){
 			return set(k,f(a[k]),b)})},
+dimmGet=bindLast(foldl,flip(get)),
 merge,
 splat,
 cloneAry=[].concat.bind([]),
@@ -172,26 +172,38 @@ memoize=function(memo,f){
 		return memo.hasOwnProperty(key)?
 			memo[key]=aryapp(f,key):memo[key]}},
 childLen=B(len,head),
-shape,/*=
-	converge(bind2nd(whileNoRet,isDefined))
-		(head push len,mknil),*/
-c_appElm=
-	curry(fork(curry(reverseArgs(flip(reverseArgs(B())))))
-		(curry2nd(reverseArgs(flip(set))),get)),
-appElm=reverseArgs(uncurry(c_appElm)),
+_2_0_1args=B(reverseArgs,flip),
+_0_2_1args=B(flip,_2_0_1args),
+_appElm=
+	fork(curry(_0_2_1args(B())))
+		(curry(_0_2_1args(set)),get),
+appElm=reverseArgs(uncurry(curry(_appElm))),
 incElm=part(appElm,inc),
+incHead=bind2nd(incElm,0),
 decElm=part(appElm,dec),
-dimention=
+decHead=bind2nd(decElm,0),
+count=
+	B1st(_while,
+		part(arity_fappose,dec)),
+_fpow=
+	c_Bc(part(get,1))
+		(B1st(args(1,bind2nd(_while,head)),
+			part(arity_fappose,dec))),
+fpow=uncurry(B(curry,_fpow)),
+countFpow,
+dimension=
 	B(part(get,1),
 		B(part(_while,
 				fappose([head,inc]),
 				B(isDefined,head)),
 			bind2nd(Array,-1))),
-toDeep,
+/*shape=
+	converge(bind2nd(whileNoRet,isDefined))
+		(head push len,mknil),*/
 map2d=function(f,a){
 	return a.map(function(b,i){
 		return b.map(function(e,j){
-			return f(e,i,j,a)})})},
+			return f([i,j],a)})})},
 flat=
 	bind2nd(fromMember([].reduce),
 		c_discard(2)(fromMember([].concat))),

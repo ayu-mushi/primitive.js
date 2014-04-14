@@ -123,7 +123,7 @@ fillAry=
 		mknil),
 fillArgs=B2nd(aryapp,fillAry),
 dup=pam(id,id),
-dupArgs=flipc(B2nd(aryapp,dup)),
+W=flipc(B2nd(aryapp,dup)),
 isDefined=part(neq,void 0),
 c_defaudApp=
 	c_B1st(justapp)
@@ -182,21 +182,27 @@ incElm=part(appElm,inc),
 incHead=bind2nd(incElm,0),
 decElm=part(appElm,dec),
 decHead=bind2nd(decElm,0),
-count=
+countDown=
 	B1st(_while,
 		part(arity_fappose,dec)),
+countUp=
+	B(bind2nd(bind2nd,0),
+		B(part(args,1),
+			B1st(_while,
+				part(arity_fappose,inc)))),
 _fpow=
 	c_Bc(part(get,1))
-		(B1st(args(1,bind2nd(_while,head)),
-			part(arity_fappose,dec))),
-fpow=uncurry(B(curry,_fpow)),
+		(B(part(args,0),
+			B(bind2nd(part,head),countDown))),
+c_fpow=B(curry,_fpow),
+fpow=uncurry(c_fpow),
 countFpow,
+hasHead=bind2nd(fromMember({}.hasOwnProperty),0),
 dimension=
-	B(part(get,1),
-		B(part(_while,
-				fappose([head,inc]),
-				B(isDefined,head)),
-			bind2nd(Array,-1))),
+	B(head,
+		part(countUp(head),
+			B(hasHead,
+				part(get,1)))),
 /*shape=
 	converge(bind2nd(whileNoRet,isDefined))
 		(head push len,mknil),*/

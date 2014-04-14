@@ -58,7 +58,6 @@ _unshift=B1st(addReturn,curry2nd(fromMember([].unshift))),
 c_push=B1st(addReturn,curry2nd(fromMember([].push))),
 _shift=part(addReturn,fromMember([].shift)),
 _pop=part(addReturn,fromMember([].pop)),
-itrate/*mulapp push*/,
 c_Bc=B1st(B,curry(B)),
 c_B1stc=B(c_Bc,curry),
 c_B2ndc=B(c_Bc,flip),
@@ -196,7 +195,24 @@ _fpow=
 			B(bind2nd(part,head),countDown))),
 c_fpow=B(curry,_fpow),
 fpow=uncurry(c_fpow),
-countFpow,
+countDownFpow,
+countUpFpow,
+_alert=part(addReturn,alert),
+idAll=args(0,id),
+id2nd=flip(id),
+itrate=
+	converge(whileNoRet)
+		(B(hook(fromMember([].push)),
+			bind2nd(B,last)),
+		flipc(c_B1st(neq)(len)),
+		idAll),
+countItrate=
+	converge(whileNoRet)
+		(B(hook(fromMember([].push)),
+			B(bind2nd(B,pam(len,last)),
+				curry(aryapp))),
+		flipc(c_B1st(neq)(len)),
+		idAll),
 hasHead=bind2nd(fromMember({}.hasOwnProperty),0),
 dimension=
 	B(head,

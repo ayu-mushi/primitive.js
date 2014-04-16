@@ -32,7 +32,6 @@ uncurry=curry(
 	args(0,
 		curry2nd(fromMember([].reduce))(justapp))),
 flipc=B(curry2nd,uncurry),
-define,
 
 op1=
 	B(part(Function,"a"),
@@ -90,6 +89,7 @@ argsOp=c_B1st(B(part(args,0),justapp))
 reverseArgs=argsOp(fromMember([].reverse)),
 curryLast=B(curry,reverseArgs),
 bindLast=uncurry(curryLast),
+define=bindLast(set,window),
 c_discard=B(argsOp,curry2nd(take)),
 discardTail=bind2nd(B,id),
 len=part(get,"length"),
@@ -141,7 +141,7 @@ dec=part(add,-1),
 lastIx=B(dec,len),
 last=hook2nd(get)(lastIx),
 swap,
-swapArg,
+swapArgs,
 double=part(mul,2),
 half=part(mul,0.5),
 centerIx=B(Math.floor,B(half,len)),
@@ -160,7 +160,6 @@ mapObj=function(f,a){
 			return set(k,f(a[k]),b)})},
 dimmGet=bindLast(foldl,flip(get)),
 merge,
-splat,
 cloneAry=[].concat.bind([]),
 clone,
 values=fork(fromMember([].map))
@@ -181,51 +180,60 @@ incElm=part(appElm,inc),
 incHead=bind2nd(incElm,0),
 decElm=part(appElm,dec),
 decHead=bind2nd(decElm,0),
-countDown=
-	B1st(_while,
-		part(arity_fappose,dec)),
-countUp=
+count=
 	B(bind2nd(bind2nd,0),
 		B(part(args,1),
 			B1st(_while,
 				part(arity_fappose,inc)))),
+_countDownFpow=
+	B(part(B,part(get,1)),
+		B1st(args(1,bind2nd(_while,head)),
+			part(args(0,flipc(__pam)),dec))),
+countDownFpow=uncurry(B(curry,_countDownFpow)),
+_countUpFpow=
+	B(part(get,1),
+		converge(_while)
+			(part(args(0,flipc(__pam)),inc),
+			B(bind2nd(B,head),curry(neq)),
+			part(Array,0))),
+countUpFpow=curry(_countUpFpow),
 _fpow=
 	c_Bc(part(get,1))
 		(B(part(args,0),
-			B(bind2nd(part,head),countDown))),
+			B(bind2nd(part,head),
+				B1st(_while,part(arity_fappose,dec))))),
 c_fpow=B(curry,_fpow),
 fpow=uncurry(c_fpow),
-countDownFpow,
-countUpFpow,
 _alert=part(addReturn,alert),
 idAll=args(0,id),
 id2nd=flip(id),
-itrate=
-	converge(whileNoRet)
-		(B(hook(fromMember([].push)),
-			bind2nd(B,last)),
-		flipc(c_B1st(neq)(len)),
-		idAll),
-countItrate=
-	converge(whileNoRet)
-		(B(hook(fromMember([].push)),
-			B(bind2nd(B,pam(len,last)),
-				curry(aryapp))),
-		flipc(c_B1st(neq)(len)),
-		idAll),
+fixdLen=
+	bind2nd(converge(whileNoRet),
+		flipc(c_B1st(neq)(len))),
+fixdLenInitialVal=bind2nd(fixdLen,idAll),
+iterate=
+	fixdLenInitialVal(B(hook(fromMember([].push)),
+			bind2nd(B,last))),
+countIterate=
+	fixdLenInitialVal(B(hook(fromMember([].push)),
+		B(bind2nd(B,pam(len,last)),
+			curry(aryapp)))),
 hasHead=bind2nd(fromMember({}.hasOwnProperty),0),
 dimension=
 	B(head,
-		part(countUp(head),
+		part(count(head),
 			B(hasHead,
 				part(get,1)))),
 /*shape=
-	converge(bind2nd(whileNoRet,isDefined))
-		(head push len,mknil),*/
+	converge(bind2nd(whileNoRet,hasHead))
+		(fappose([head,B(fromMember([].push),len)]),mknil),*/
 map2d=function(f,a){
 	return a.map(function(b,i){
 		return b.map(function(e,j){
 			return f([i,j],a)})})},
+/*splat=
+	bindLast(foldl,
+		fromMember([].slice)),*/
 flat=
 	bind2nd(fromMember([].reduce),
 		c_discard(2)(fromMember([].concat))),

@@ -224,9 +224,14 @@ dimension=
 		part(count(head),
 			B(hasHead,
 				part(get,1)))),
-/*shape=
-	converge(bind2nd(whileNoRet,hasHead))
-		(fappose([head,B(fromMember([].push),len)]),mknil),*/
+shape=
+	flip(args(0,
+		B(head,
+			part(_while,
+				flipc(__pam)([converge(flip(uncurry(c_push)))(id,len),
+					flip(head)]),
+				B(hasHead,
+					part(get,1)))))),
 map2d=function(f,a){
 	return a.map(function(b,i){
 		return b.map(function(e,j){

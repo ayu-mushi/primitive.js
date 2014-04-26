@@ -9,7 +9,7 @@ function args(n,f){
 			[].slice.call(arguments,0,n).concat([[].slice.call(arguments,n)]))}}
 function curry(f){
 	return function(){
-		return f.bind.apply(f,[null].concat([].slice.call(arguments)))}}
+		[].unshift.call(arguments,null);return f.bind.apply(f,arguments)}}
 function justapp(f,a){return f(a)}
 function _while(f,p,a){while(p(a))a=f(a);return a}
 function whileNoRet(f,p,a){while(p(a))f(a);return a}
@@ -73,6 +73,7 @@ fork=
 		c_B1st(bind2nd(B,
 				args(1,_pam)))
 			(curry(aryapp))),
+//fork=,
 c_forkc=c_B1st(B)(fork),
 hook=B(bind2nd(part,id),fork),
 hook2nd=B(bind2nd(bind2nd,id),fork),
@@ -105,10 +106,8 @@ zipWith,
 zipapp=B(bind2nd(fromMember([].map),
 		part(aryapp,justapp)),
 	zip),
-fappose=/* (***) */
-	curry(zipapp),
-arity_fappose=
-	args(0,fappose),
+fappose=curry(zipapp),// (***)
+arity_fappose=args(0,fappose),
 converge=
 	B(part(args,0),
 		c_B1st(bind2nd(B,
@@ -122,6 +121,7 @@ fillAry=
 		mknil),
 fillArgs=B2nd(aryapp,fillAry),
 dup=pam(id,id),
+select,
 W=flipc(B2nd(aryapp,dup)),
 isDefined=part(neq,void 0),
 c_defaudApp=
@@ -167,8 +167,10 @@ memoize=function(memo,f){
 	return function(){
 		var key=arguments;
 		return memo.hasOwnProperty(key)?
-			memo[key]=aryapp(f,key):memo[key]}},
+			memo[key]:memo[key]=aryapp(f,key)}},
 childLen=B(len,head),
+height=len,
+width=childLen,
 _2_0_1args=B(reverseArgs,flip),
 _0_2_1args=B(flip,_2_0_1args),
 _appElm=
@@ -215,13 +217,12 @@ iterate=
 	fixdLenInitialVal(B(hook(fromMember([].push)),
 			bind2nd(B,last))),
 _2ndOrderIterate=
-	B(part(fixdLen,
-			B(hook(fromMember([].push)),
-				B(bind2nd(B,
-					pam(last,
-						hook2nd(get)(B(part(add,-2),len)))),
-				curry(aryapp)))),
-		constant),
+	fixdLen(B(hook(fromMember([].push)),
+			B(bind2nd(B,
+				pam(last,
+					hook2nd(get)(B(part(add,-2),len)))),
+			curry(aryapp))),
+		id),
 countIterate=
 	fixdLenInitialVal(B(hook(fromMember([].push)),
 		B(bind2nd(B,pam(len,last)),
@@ -257,4 +258,6 @@ c_imp=c_B1st(or)(not),
 imp=uncurry(c_imp),
 thenId=bind2nd(iif,id),
 c_elseId=c_B1st(thenId)(not),
-thenIt=function(p,a,b){return p(a)?a:b}
+uncurryFor1_2=B(uncurry,part(B,curry)),
+thenIt=B(W,B(uncurryFor1_2,c_B1st(iif))),
+elseIt=B(thenIt,part(B,not))

@@ -73,12 +73,8 @@ fork=
 		c_B1st(bind2nd(B,
 				args(1,_pam)))
 			(curry(aryapp))),
-//fork=,
-c_forkc=c_B1st(B)(fork),
 hook=B(bind2nd(part,id),fork),
 hook2nd=B(bind2nd(bind2nd,id),fork),
-hookc=c_B1st(B)(hook),
-//addFillAry=c_B1st(mulapp)(c_push),
 head=part(get,0),
 tail=bind2nd(fromMember([].slice),1),
 take=bind2nd(fromMember([].slice),0),
@@ -121,8 +117,8 @@ fillAry=
 		mknil),
 fillArgs=B2nd(aryapp,fillAry),
 dup=pam(id,id),
-select,
 W=flipc(B2nd(aryapp,dup)),
+T=curry2nd(justapp),
 isDefined=part(neq,void 0),
 c_defaudApp=
 	c_B1st(justapp)
@@ -171,11 +167,11 @@ memoize=function(memo,f){
 childLen=B(len,head),
 height=len,
 width=childLen,
-_2_0_1args=B(reverseArgs,flip),
-_0_2_1args=B(flip,_2_0_1args),
+zxyArgs=B(reverseArgs,flip),
+xzyArgs=B(flip,zxyArgs),
 _appElm=
-	fork(curry(_0_2_1args(B())))
-		(curry(_0_2_1args(set)),get),
+	fork(curry(xzyArgs(B())))
+		(curry(xzyArgs(set)),get),
 appElm=reverseArgs(uncurry(curry(_appElm))),
 incElm=part(appElm,inc),
 incHead=bind2nd(incElm,0),
@@ -241,13 +237,16 @@ shape=
 					flip(head)]),
 				B(hasHead,
 					part(get,1)))))),
-map2d=function(f,a){
-	return a.map(function(b,i){
-		return b.map(function(e,j){
-			return f([i,j],a)})})},
+c_map2d=
+	c_B2nd(fromMember([].map),
+		curry2nd(fromMember([].map))),
+c_extract=
+	B(bind2nd(B,pam(id,add)),
+		B(curry(aryapp),
+			curry(fromMember([].slice)))),
 /*splat=
-	bindLast(foldl,
-		fromMember([].slice)),*/
+	B(flipc(c_foldl([])),
+		c_extract),*/
 flat=
 	bind2nd(fromMember([].reduce),
 		c_discard(2)(fromMember([].concat))),
@@ -259,5 +258,7 @@ imp=uncurry(c_imp),
 thenId=bind2nd(iif,id),
 c_elseId=c_B1st(thenId)(not),
 uncurryFor1_2=B(uncurry,part(B,curry)),
-thenIt=B(W,B(uncurryFor1_2,c_B1st(iif))),
-elseIt=B(thenIt,part(B,not))
+x_xyArgs=B(W,uncurryFor1_2),
+thenIt=B(x_xyArgs,c_B1st(iif)),
+elseIt=B(thenIt,part(B,not)),
+defauVal=curry2nd(thenIt(isDefined))

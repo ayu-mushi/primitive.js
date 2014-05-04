@@ -109,7 +109,8 @@ converge=
 		c_B1st(bind2nd(B,
 			args(1,zipapp)))
 		(curry(aryapp))),
-mknil=B(part(aryapp,Array),constant([])),
+c_aryBond=c_B1st(B)(curry(aryapp)),
+mknil=c_aryBond(Array)(constant([])),
 fillAry=
 	converge(whileNoRet)
 		(curry2nd(fromMember([].push)),
@@ -237,16 +238,25 @@ shape=
 					flip(head)]),
 				B(hasHead,
 					part(get,1)))))),
+findIx=
+	B(bind2nd(part(_while,inc),0),
+		fork(fork(and))
+			(converge(B)(id,curry2nd(get)),
+			flip(c_B1st(neq)(len)))),
+find=fork(get)(findIx,flip(id)),
+match,
+guard,
 c_map2d=
 	c_B2nd(fromMember([].map),
 		curry2nd(fromMember([].map))),
 c_extract=
-	B(bind2nd(B,pam(id,add)),
-		B(curry(aryapp),
-			curry(fromMember([].slice)))),
+	B(flipc(c_aryBond)(pam(id,add)),
+		curry(fromMember([].slice))),
 /*splat=
 	B(flipc(c_foldl([])),
 		c_extract),*/
+takeWhile,
+nub,
 flat=
 	bind2nd(fromMember([].reduce),
 		c_discard(2)(fromMember([].concat))),

@@ -3,7 +3,7 @@ function get(i,a){return a[i]}
 function set(i,e,a){a[i]=e;return a}
 function _aryapp(f,ctx,a){return f.apply(ctx,a)}
 function addReturn(f,a){f(a);return a}
-function args(n,f){
+function dotail(n,f){
 	return function(){
 		return f.apply(null,
 			[].slice.call(arguments,0,n).concat([[].slice.call(arguments,n)]))}}
@@ -15,21 +15,21 @@ function _while(f,p,a){while(p(a))a=f(a);return a}
 function whileNoRet(f,p,a){while(p(a))f(a);return a}
 var
 flip=curry(
-	args(3,
+	dotail(3,
 		function(f,a,b,rest){
 			return f.apply(null,[b].concat([a],rest))})),
 bind2nd=flip,
 B=curry(
-	args(2,
+	dotail(2,
 		function(f,g,a){
 			return f(g.apply(null,a))})),
-_call=args(2,_aryapp),
+_call=dotail(2,_aryapp),
 fromMember=curry(_call),
-part=bind2nd(fromMember(alert.bind),null),
+part=bind2nd(fromMember(B.bind),null),
 wrap=curry,
 curry2nd=curry(bind2nd),
 uncurry=curry(
-	args(0,
+	dotail(0,
 		curry2nd(fromMember([].reduce))(justapp))),
 flipc=B(curry2nd,uncurry),
 
@@ -65,13 +65,13 @@ __pam=
 		curry2nd(aryapp)),
 _pam=flip(uncurry(__pam)),
 pam= /* (&&&) */
-	args(0,
-		curry(args(1,_pam))),
-_hook=part(pam,id),
+	dotail(0,
+		curry(dotail(1,_pam))),
+transparentPam=part(pam,id),
 fork=
-	B(part(args,0),
+	B(part(dotail,0),
 		c_B1st(bind2nd(B,
-				args(1,_pam)))
+				dotail(1,_pam)))
 			(curry(aryapp))),
 hook=B(bind2nd(part,id),fork),
 hook2nd=B(bind2nd(bind2nd,id),fork),
@@ -80,22 +80,24 @@ tail=bind2nd(fromMember([].slice),1),
 take=bind2nd(fromMember([].slice),0),
 c_drop=c_B2nd(take)(neg),
 init=c_drop(1),
-argsOp=c_B1st(B(part(args,0),justapp))
+argsOp=c_B1st(B(part(dotail,0),justapp))
 		(B(flipc,
 			part(B2nd,aryapp))),
 reverseArgs=argsOp(fromMember([].reverse)),
 curryLast=B(curry,reverseArgs),
 bindLast=uncurry(curryLast),
-define=bindLast(set,window),
+//define=bindLast(set,window),
 c_discard=B(argsOp,curry2nd(take)),
 discardTail=bind2nd(B,id),
+c_aryBond=c_B1st(B)(curry(aryapp)),
+discardAll=flipc(c_aryBond)(constant([])),
 len=part(get,"length"),
 turn,
 zip=function(x,y){
 	return x.map(function(e,i){return [e,y[i]]})},
 c_zip=
 	c_B2nd(fromMember([].map))
-		(B(_hook,
+		(B(transparentPam,
 			B(flip,curry2nd(get)))),
 unzip,
 zipWith,
@@ -103,22 +105,23 @@ zipapp=B(bind2nd(fromMember([].map),
 		part(aryapp,justapp)),
 	zip),
 fappose=curry(zipapp),// (***)
-arity_fappose=args(0,fappose),
+rt_fappose=dotail(0,fappose),
 converge=
-	B(part(args,0),
+	B(part(dotail,0),
 		c_B1st(bind2nd(B,
-			args(1,zipapp)))
+			dotail(1,zipapp)))
 		(curry(aryapp))),
-c_aryBond=c_B1st(B)(curry(aryapp)),
-mknil=c_aryBond(Array)(constant([])),
+mkNil=discardAll(Array),
+isNil,
 fillAry=
 	converge(whileNoRet)
 		(curry2nd(fromMember([].push)),
 		flipc(c_B1st(neq)(len)),
-		mknil),
+		mkNil),
 fillArgs=B2nd(aryapp,fillAry),
 dup=pam(id,id),
 W=flipc(B2nd(aryapp,dup)),
+twice=W(B),
 T=curry2nd(justapp),
 isDefined=part(neq,void 0),
 c_defaudApp=
@@ -131,7 +134,7 @@ defaudZipapp=
 	zip),
 c_jcompose=
 	c_B1st(bind2nd(B,
-			args(1,flip(fromMember([].map)))))
+			dotail(1,flip(fromMember([].map)))))
 		(curry(aryapp)),
 inc=part(add,1),
 dec=part(add,-1),
@@ -180,31 +183,32 @@ decElm=part(appElm,dec),
 decHead=bind2nd(decElm,0),
 count=
 	B(bind2nd(bind2nd,0),
-		B(part(args,1),
+		B(part(dotail,1),
 			B1st(_while,
-				part(arity_fappose,inc)))),
-_countDownFpow=
+				part(rt_fappose,inc)))),
+toCountDownable_Iteratable=
 	B(part(B,part(get,1)),
-		B1st(args(1,bind2nd(_while,head)),
-			part(args(0,flipc(__pam)),dec))),
-countDownFpow=uncurry(B(curry,_countDownFpow)),
-_countUpFpow=
+		B1st(dotail(1,bind2nd(_while,head)),
+			part(dotail(0,flipc(__pam)),dec))),
+countDownFpow=uncurry(B(curry,toCountDownable_Iteratable)),
+countUpMulApp=
 	B(part(get,1),
 		converge(_while)
-			(part(args(0,flipc(__pam)),inc),
+			(part(dotail(0,flipc(__pam)),inc),
 			B(bind2nd(B,head),curry(neq)),
 			part(Array,0))),
-countUpFpow=curry(_countUpFpow),
-_fpow=
+countUpFpow=curry(countUpMulApp),
+partAryFunc,
+toIteratable=
 	c_Bc(part(get,1))
-		(B(part(args,0),
+		(B(part(dotail,0),
 			B(bind2nd(part,head),
-				B1st(_while,part(arity_fappose,dec))))),
-c_fpow=B(curry,_fpow),
+				B1st(_while,part(rt_fappose,dec))))),
+c_fpow=B(curry,toIteratable),
 fpow=uncurry(c_fpow),
 _2ndOrderFpow,
-_alert=part(addReturn,alert),
-idAll=args(0,id),
+//_alert=part(addReturn,alert),
+idAll=dotail(0,id),
 id2nd=flip(id),
 fixdLen=
 	bind2nd(converge(whileNoRet),
@@ -224,26 +228,39 @@ countIterate=
 	fixdLenInitialVal(B(hook(fromMember([].push)),
 		B(bind2nd(B,pam(len,last)),
 			curry(aryapp)))),
-hasHead=bind2nd(fromMember({}.hasOwnProperty),0),
+hasHead=bind2nd(fromMember(hasOwnProperty),0),
 dimension=
 	B(head,
 		part(count(head),
 			B(hasHead,
 				part(get,1)))),
 shape=
-	flip(args(0,
+	flip(dotail(0,
 		B(head,
 			part(_while,
 				flipc(__pam)([converge(flip(uncurry(c_push)))(id,len),
 					flip(head)]),
 				B(hasHead,
 					part(get,1)))))),
+/*takeWhile=
+	converge(whileNoRet)
+		(),*/
+dropWhile,
+whileInc=bind2nd(part(_while,inc),0),
 findIx=
-	B(bind2nd(part(_while,inc),0),
+	B(whileInc,
 		fork(fork(and))
-			(converge(B)(id,curry2nd(get)),
+			(converge(B)(part(B,not),curry2nd(get)),
 			flip(c_B1st(neq)(len)))),
 find=fork(get)(findIx,flip(id)),
+lastFindIx,
+lastFind,
+mkTypeChecker=flipc(c_B1st(eq)(fromMember(toString))),
+isNum=mkTypeChecker("[object Number]"),
+isStr=mkTypeChecker("[object String]"),
+isFn=mkTypeChecker("[object Function]"),
+isBool,
+matchAry,
 match,
 guard,
 c_map2d=
@@ -255,11 +272,13 @@ c_extract=
 /*splat=
 	B(flipc(c_foldl([])),
 		c_extract),*/
-takeWhile,
 nub,
 flat=
 	bind2nd(fromMember([].reduce),
 		c_discard(2)(fromMember([].concat))),
+union,
+meet,
+logicOpForSet,
 nor=B(not,or),
 nand=B(not,and),
 xor=fork(and)(or,nand),
@@ -271,4 +290,4 @@ uncurryFor1_2=B(uncurry,part(B,curry)),
 x_xyArgs=B(W,uncurryFor1_2),
 thenIt=B(x_xyArgs,c_B1st(iif)),
 elseIt=B(thenIt,part(B,not)),
-defauVal=curry2nd(thenIt(isDefined))
+defauVal=curry2nd(thenIt(isDefined));

@@ -36,7 +36,7 @@ flipc=B(curry2nd,uncurry),
 op1=
 	B(part(Function,"a"),
 		bind2nd("".concat.bind("return "),"a")),
-neg=op1("-"),not=op1("!"),bit_not=op1("~"),id=op1(""),
+neg=op1("-"),not=op1("!"),bit_not=op1("~"),id=op1(""),type=op1("typeof "),
 
 op2=
 	B(part(Function,"a,b"),
@@ -140,8 +140,12 @@ inc=part(add,1),
 dec=part(add,-1),
 lastIx=B(dec,len),
 last=hook2nd(get)(lastIx),
-swap,
-swapArgs,
+cp=
+	fork(set)
+		(reverseArgs(id),get,flip(id)),
+swap=
+	fork(set)
+		(id,reverseArgs(get),cp),
 half=part(mul,0.5),
 centerIx=B(Math.floor,B(half,len)),
 center=hook2nd(get)(centerIx),
@@ -173,10 +177,10 @@ height=len,
 width=childLen,
 zxyArgs=B(reverseArgs,flip),
 xzyArgs=B(flip,zxyArgs),
-_appElm=
+toAppElmableAry=
 	fork(curry(xzyArgs(B())))
 		(curry(xzyArgs(set)),get),
-appElm=reverseArgs(uncurry(curry(_appElm))),
+appElm=reverseArgs(uncurry(curry(toAppElmableAry))),
 incElm=part(appElm,inc),
 incHead=bind2nd(incElm,0),
 decElm=part(appElm,dec),
@@ -234,7 +238,7 @@ dimension=
 		part(count(head),
 			B(hasHead,
 				part(get,1)))),
-shape=
+shapeOf=
 	flip(dotail(0,
 		B(head,
 			part(_while,
@@ -260,9 +264,7 @@ isNum=mkTypeChecker("[object Number]"),
 isStr=mkTypeChecker("[object String]"),
 isFn=mkTypeChecker("[object Function]"),
 isBool,
-matchAry,
-match,
-guard,
+guard=B1st(findIx,curry2nd(aryapp)),
 c_map2d=
 	c_B2nd(fromMember([].map),
 		curry2nd(fromMember([].map))),
@@ -290,4 +292,4 @@ uncurryFor1_2=B(uncurry,part(B,curry)),
 x_xyArgs=B(W,uncurryFor1_2),
 thenIt=B(x_xyArgs,c_B1st(iif)),
 elseIt=B(thenIt,part(B,not)),
-defauVal=curry2nd(thenIt(isDefined));
+defauVal=curry2nd(thenIt(isDefined))

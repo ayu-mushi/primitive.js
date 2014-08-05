@@ -221,11 +221,16 @@ fpow=uncurry(c_fpow),
 isPositive=part(lt,0),
 isNegative=part(gt,0),
 
-inversible_toIteratable=
+/*inversible_toIteratable=
 	fork(fpow)
 		(B(bind2nd(B,isNegative),
 			curry(reverseArgs(iif))),	
 		Math.abs),
+*/
+inversibleFpow=
+	fork(B)
+		(c_B2nd(fpow)(Math.abs),
+		c_B1st(iif)(isNegative)),
 
 _2ndOrderFpow,
 //_alert=part(addReturn,alert),

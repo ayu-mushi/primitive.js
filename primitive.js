@@ -1,4 +1,4 @@
-function iif(p,a,b){return p?a:b}
+function iif(q,a,b){return q?a:b}
 function get(i,a){return a[i]}
 function set(i,e,a){a[i]=e;return a}
 function _aryapp(f,ctx,a){return f.apply(ctx,a)}
@@ -86,7 +86,7 @@ argsOp=c_B1st(B(part(dotail,0),justapp))
 reverseArgs=argsOp(fromMember([].reverse)),
 curryLast=B(curry,reverseArgs),
 bindLast=uncurry(curryLast),
-//define=bindLast(set,window),
+define=bindLast(set,this),
 c_discard=B(argsOp,curry2nd(take)),
 discardTail=bind2nd(B,id),
 c_aryBond=c_B1st(B)(curry(aryapp)),
@@ -100,7 +100,10 @@ c_zip=
 		(B(transparentPam,
 			B(flip,curry2nd(get)))),
 unzip,
-zipWith,
+c_zipWith=
+	B(bind2nd(B,curry(aryapp)),
+		c_B1st(fromMember([].map))
+			(zip)),
 zipapp=B(bind2nd(fromMember([].map),
 		part(aryapp,justapp)),
 	zip),
@@ -112,7 +115,7 @@ converge=
 			dotail(1,zipapp)))
 		(curry(aryapp))),
 mkNil=discardAll(Array),
-isNil,
+isEmpty,
 fillAry=
 	converge(whileNoRet)
 		(curry2nd(fromMember([].push)),
@@ -144,8 +147,13 @@ cp=
 	fork(set)
 		(reverseArgs(id),get,flip(id)),
 swap=
-	fork(set)
-		(id,reverseArgs(get),cp),
+	hook(set)
+		(reverseArgs(get),cp),
+swapLast,
+dupLast=
+	fork(justapp)
+		(curry(fromMember([].push)),last),
+rotate,
 half=part(mul,0.5),
 centerIx=B(Math.floor,B(half,len)),
 center=hook2nd(get)(centerIx),
@@ -177,10 +185,10 @@ height=len,
 width=childLen,
 zxyArgs=B(reverseArgs,flip),
 xzyArgs=B(flip,zxyArgs),
-toAppElmableAry=
+_appElm=
 	fork(curry(xzyArgs(B())))
 		(curry(xzyArgs(set)),get),
-appElm=reverseArgs(uncurry(curry(toAppElmableAry))),
+appElm=reverseArgs(uncurry(curry(_appElm))),
 incElm=part(appElm,inc),
 incHead=bind2nd(incElm,0),
 decElm=part(appElm,dec),
@@ -210,6 +218,15 @@ toIteratable=
 				B1st(_while,part(rt_fappose,dec))))),
 c_fpow=B(curry,toIteratable),
 fpow=uncurry(c_fpow),
+isPositive=part(lt,0),
+isNegative=part(gt,0),
+
+inversible_toIteratable=
+	fork(fpow)
+		(B(bind2nd(B,isNegative),
+			curry(reverseArgs(iif))),	
+		Math.abs),
+
 _2ndOrderFpow,
 //_alert=part(addReturn,alert),
 idAll=dotail(0,id),
@@ -264,7 +281,11 @@ isNum=mkTypeChecker("[object Number]"),
 isStr=mkTypeChecker("[object String]"),
 isFn=mkTypeChecker("[object Function]"),
 isBool,
-guard=B1st(findIx,curry2nd(aryapp)),
+c_bee=B(c_jcompose(justapp),curry(get)),
+_1_2To2_1args=B(curry,uncurryFor1_2),
+guard=
+	hook2nd(c_B1st(justapp)(get))
+		(c_B1st(findIx)(curry2nd(aryapp))),
 c_map2d=
 	c_B2nd(fromMember([].map),
 		curry2nd(fromMember([].map))),
@@ -278,9 +299,12 @@ nub,
 flat=
 	bind2nd(fromMember([].reduce),
 		c_discard(2)(fromMember([].concat))),
+eqAry,
 union,
 meet,
 logicOpForSet,
+tautology=constant(true),
+contradiction=constant(false),
 nor=B(not,or),
 nand=B(not,and),
 xor=fork(and)(or,nand),

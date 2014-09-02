@@ -13,6 +13,8 @@ function curry(f){
 function justapp(f,a){return f(a)}
 function _while(f,p,a){while(p(a))a=f(a);return a}
 function whileNoRet(f,p,a){while(p(a))f(a);return a}
+function ifFn(p,f,g,a){return p(a)?f(a):g(a)}
+function del(a,i){delete a[i];return a}
 var
 flip=curry(
 	dotail(3,
@@ -139,6 +141,13 @@ c_jcompose=
 	c_B1st(bind2nd(B,
 			dotail(1,flip(fromMember([].map)))))
 		(curry(aryapp)),
+linearChainl=
+	bind2nd(fromMember([].reduce),
+		flip(fromMember(B.call))),
+linearChainr=
+	bind2nd(fromMember([].reduceRight),
+		fromMember(B.call)),
+
 inc=part(add,1),
 dec=part(add,-1),
 lastIx=B(dec,len),
@@ -159,8 +168,8 @@ centerIx=B(Math.floor,B(half,len)),
 center=hook2nd(get)(centerIx),
 back=fork(function(f,a){return function(n){return a[f(n)]}})
 		(B1st(sub,lastIx),id),
-ringGet,
-ringSet,
+torusGet,
+torusSet,
 c_foldl=c_B1stc(fromMember([].reduce))
 	(_unshift),
 foldl=uncurry(c_foldl),
@@ -169,6 +178,7 @@ mapObj=function(f,a){
 		(Object.keys(a))
 		(function(b,k,i){
 			return set(k,f(a[k]),b)})},
+inverseObject,
 dimmGet=bindLast(foldl,flip(get)),
 merge,
 cloneAry=[].concat.bind([]),
@@ -180,6 +190,12 @@ memoize=function(memo,f){
 		var key=arguments;
 		return memo.hasOwnProperty(key)?
 			memo[key]:memo[key]=aryapp(f,key)}},
+c_nonRecursive_hasOwnChildNode,
+recursive_hasOwnChildNode,
+memoizeAryFn=function(memo,f){
+	return function(ary){
+		return memo.hasOwnProperty(key)?
+			memo[key]:memo[key]=f(ary)}},
 childLen=B(len,head),
 height=len,
 width=childLen,
@@ -188,11 +204,15 @@ xzyArgs=B(flip,zxyArgs),
 _appElm=
 	fork(curry(xzyArgs(B())))
 		(curry(xzyArgs(set)),get),
-appElm=reverseArgs(uncurry(curry(_appElm))),
+appElm=zxyArgs(uncurry(curry(_appElm))),
 incElm=part(appElm,inc),
 incHead=bind2nd(incElm,0),
 decElm=part(appElm,dec),
 decHead=bind2nd(decElm,0),
+c_whileWithLimits=
+	B(part(dotail,1),
+		B1st(_while,
+			part(rt_fappose,inc))),//ex. c_whileWithLimits(inc)(B(part(neq,5),head),0,0) -> [5,5]
 count=
 	B(bind2nd(bind2nd,0),
 		B(part(dotail,1),
@@ -226,7 +246,9 @@ c_inversibleFpow=
 	fork(B)
 		(c_B2nd(fpow)(Math.abs),
 		c_B1st(iif)(isNotNegative)),
-
+yzxArgs=B(flip,reverseArgs),
+inversible_toIteratable=
+	curry(yzxArgs(uncurry(c_inversibleFpow))),
 _2ndOrderFpow,
 //_alert=part(addReturn,alert),
 idAll=dotail(0,id),
@@ -250,19 +272,18 @@ countIterate=
 		B(bind2nd(B,pam(len,last)),
 			curry(aryapp)))),
 hasHead=bind2nd(fromMember(hasOwnProperty),0),
+
+
+focus //for array. N (index) -> Array (target) -> Array (forcused).
+	,
+modify,
+topMust,
+
 dimension=
 	B(head,
 		part(count(head),
 			B(hasHead,
 				part(get,1)))),
-shapeOf=
-	flip(dotail(0,
-		B(head,
-			part(_while,
-				flipc(__pam)([converge(flip(uncurry(c_push)))(id,len),
-					flip(head)]),
-				B(hasHead,
-					part(get,1)))))),
 /*takeWhile=
 	converge(whileNoRet)
 		(),*/
@@ -274,8 +295,11 @@ findIx=
 			(converge(B)(part(B,not),curry2nd(get)),
 			flip(c_B1st(neq)(len)))),
 find=fork(get)(findIx,flip(id)),
+findWithLimits=
+	whileWithLimits,
 lastFindIx,
 lastFind,
+lastFindWithLimits,
 mkTypeChecker=flipc(c_B1st(eq)(fromMember(toString))),
 isNum=mkTypeChecker("[object Number]"),
 isStr=mkTypeChecker("[object String]"),

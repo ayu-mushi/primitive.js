@@ -296,7 +296,10 @@ findIx=
 			flip(c_B1st(neq)(len)))),
 find=fork(get)(findIx,flip(id)),
 findWithLimits=
-	whileWithLimits,
+	c_B1stc(c_whileWithLimits(id))
+		(fork(fork(or))
+		 	(B(part(B,head),curry(neq)),
+			bind2nd(B,get))),
 lastFindIx,
 lastFind,
 lastFindWithLimits,

@@ -78,6 +78,8 @@ fork=
 hook=B(bind2nd(part,id),fork),
 hook2nd=B(bind2nd(bind2nd,id),fork),
 head=part(get,0),
+postComposeHead=bind2nd(B,head),
+c_isGetable=B(part(fork(and),part(le,0)),c_B1st(gt)(len)),
 tail=bind2nd(fromMember([].slice),1),
 take=bind2nd(fromMember([].slice),0),
 c_drop=c_B2nd(take)(neg),
@@ -289,17 +291,21 @@ dimension=
 		(),*/
 dropWhile,
 whileInc=bind2nd(part(_while,inc),0),
+isIn=function(e,a){for(var i=a.length;i;i--)if(a[i]===e){return true}return false},
+isInRange=function(e,a,n,m){for(;n!=m;m--)if(a[m]===e){return true}return false},
 findIx=
 	B(whileInc,
 		fork(fork(and))
 			(converge(B)(part(B,not),curry2nd(get)),
 			flip(c_B1st(neq)(len)))),
 find=fork(get)(findIx,flip(id)),
-findWithLimits=
+/*c_findWithLimits=
 	c_B1stc(c_whileWithLimits(id))
 		(fork(fork(or))
-		 	(B(part(B,head),curry(neq)),
-			bind2nd(B,get))),
+		 	(B(bind2nd(B,head),curry(neq)),
+			bind2nd(B,get))),*/
+findWithLimits=c_whileWithLimits(),
+	//part(rt_fappose,inc)()([0]) -> [1]
 lastFindIx,
 lastFind,
 lastFindWithLimits,

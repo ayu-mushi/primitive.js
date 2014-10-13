@@ -84,7 +84,8 @@ tail=bind2nd(fromMember([].slice),1),
 take=bind2nd(fromMember([].slice),0),
 c_drop=c_B2nd(take)(neg),
 init=c_drop(1),
-insert=bind2nd(fromMember([].splice),0),
+insert=function(i,e,a){
+	a.splice(i,0,e);return a},
 argsOp=c_B1st(B(part(dotail,0),justapp))
 		(B(flipc,
 			part(B2nd,aryapp))),
